@@ -1,0 +1,16 @@
+{
+  "name": "conejito-server",
+  "version": "0.1.0",
+  "main": "app.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node app.js",
+    "console": "node console.js",
+    "setup": "pm2 deploy ecosystem.config.js production setup",
+    "deploy": "pm2 deploy ecosystem.config.js production"
+  },
+  "dependencies": {
+    "node-wit": "^4.3.0",
+    "restify": "^6.3.2"
+  }
+}
