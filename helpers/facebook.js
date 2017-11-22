@@ -1,5 +1,6 @@
 const request = require('request');
 
+const bot = require('./bot');
 const secret = require('./secret');
 
 const handleMessage = (sender_psid, received_message) => {
@@ -7,11 +8,13 @@ const handleMessage = (sender_psid, received_message) => {
   
   // Checks if the message contains text
   if (received_message.text) {    
-    // Create the payload for a basic text message, which
-    // will be added to the body of our request to the Send API
-    response = {
-      "text": `You sent the message: "${received_message.text}". Now send me an attachment!`
-    }
+    bot.ask(received_message.text)
+      .then( (response) => {
+        response = {
+          "text": bot.answer(response)
+        }
+        callSendAPI(sender_psid, JSON.stringify(response));
+      });
   } else if (received_message.attachments) {
     // Get the URL of the message attachment
     let attachment_url = received_message.attachments[0].payload.url;
@@ -40,10 +43,9 @@ const handleMessage = (sender_psid, received_message) => {
         }
       }
     }
-  } 
-  
-  // Send the response message
-  callSendAPI(sender_psid, response);    
+    // Send the response message
+    callSendAPI(sender_psid, response);
+  }   
 }
 
 const callSendAPI = (sender_psid, response) => {
@@ -62,7 +64,7 @@ const callSendAPI = (sender_psid, response) => {
     "json": request_body
   }, (err, res, body) => {
     if (!err) {
-      console.log('message sent!')
+      console.log('message sent!', request_body)
     } else {
       console.error("Unable to send message:" + err);
     }
@@ -132,7 +134,9 @@ const facebookMessenager = {
           }
         });
         // Return a '200 OK' response to all events
-        res.send(200, 'EVENT_RECEIVED');
+        setTimeout( () => {
+          res.send(200, 'EVENT_RECEIVED');        
+        }, 2000);
       } else {
         // Return a '404 Not Found' if event is not from a page subscription
         res.send(404);

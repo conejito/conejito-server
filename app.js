@@ -31,10 +31,7 @@ server.post('/message', (req, res, next) => {
   const message = req.body.q.toLowerCase();
   bot.ask(message)
     .then( (response) => {
-      return bot.answer(response)
-    })
-    .then( (answer) => {
-      res.send( answer );
+      res.send( bot.answer(response) );
     });
 });
 
