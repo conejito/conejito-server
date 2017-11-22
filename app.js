@@ -9,6 +9,8 @@ const facebook = require('./helpers/facebook');
 server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
 
+server.use(restify.plugins.requestLogger());
+
 // allow cross-origin resource sharing
 server.use( (req,res,next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -20,9 +22,8 @@ server.on('uncaughtException', () => {
   console.log('============ uncaughtException ============');
 });
 
-server.get('/webhook', facebook.verify, (req, res, next) => {
-  console.log(req.body);
-});
+server.get('/webhook', facebook.verify);
+server.post('/webhook', facebook.handleRequest);
 
 // handle incoming messages
 server.post('/message', (req, res, next) => {
