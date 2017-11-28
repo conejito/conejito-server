@@ -1,2 +1,3 @@
 const bot = require('./modules/wit-ai');
-bot.interactive(client);
+const {interactive} = require('node-wit');
+interactive(bot);

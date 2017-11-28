@@ -3,49 +3,34 @@ const request = require('request');
 const bot = require('./bot');
 const secret = require('./secret');
 
-const handleMessage = (sender_psid, received_message) => {
-  let response;
+const handleMessage = async (sender_psid, received_message) => {
+  //let response;
   
-  // Checks if the message contains text
-  if (received_message.text) {    
-    bot.ask(received_message.text)
-      .then( (response) => {
-        response = {
-          "text": bot.answer(response)
-        }
-        callSendAPI(sender_psid, JSON.stringify(response));
-      });
-  } else if (received_message.attachments) {
-    // Get the URL of the message attachment
-    let attachment_url = received_message.attachments[0].payload.url;
-    response = {
-      "attachment": {
-        "type": "template",
-        "payload": {
-          "template_type": "generic",
-          "elements": [{
-            "title": "Is this the right picture?",
-            "subtitle": "Tap a button to answer.",
-            "image_url": attachment_url,
-            "buttons": [
-              {
-                "type": "postback",
-                "title": "Yes!",
-                "payload": "yes",
-              },
-              {
-                "type": "postback",
-                "title": "No!",
-                "payload": "no",
-              }
-            ],
-          }]
-        }
-      }
+  if (received_message.text) {
+    console.log(`Recived message via Messenager from ${sender_psid} -`, received_message.text)
+    const response = await bot.ask(received_message.text.toLowerCase())
+    const r = await bot.answer(response)
+    const answer = r ? r : await bot.unclear()
+    console.log(answer[0].Answer)
+    const res = {
+      "text": answer[0].Answer
     }
-    // Send the response message
-    callSendAPI(sender_psid, response);
-  }   
+    callSendAPI(sender_psid, JSON.stringify(res));
+    //res.send( answer );
+
+    //const response = await bot.ask(received_message.text.toLowerCase())
+
+    //const r = await bot.answer(response)
+    //const answer = r ? r : await bot.unclear()
+
+    // const answer = bot.answer(response)
+    //   .then( (answer) => {
+        // response = {
+        //   "text": answer
+        // }
+    //     callSendAPI(sender_psid, JSON.stringify(response));
+    //   });
+  }
 }
 
 const callSendAPI = (sender_psid, response) => {
@@ -64,7 +49,8 @@ const callSendAPI = (sender_psid, response) => {
     "json": request_body
   }, (err, res, body) => {
     if (!err) {
-      console.log('message sent!', request_body)
+      console.log(`Send answer via Messenager to ${sender_psid} -`, response.text)
+      //console.log('message sent!', request_body)
     } else {
       console.error("Unable to send message:" + err);
     }
@@ -107,11 +93,11 @@ const facebookMessenager = {
     next();
   },
   handleRequest: (req, res, next) => {
-    console.log('handleRequest');
+    console.log('--- Facebook Messenager Request ---');
     // Parse the request body from the POST
     if(!req.body) return;
     let body = req.body;
-    console.log(body);
+    //console.log(body);
       // Check the webhook event is from a Page subscription
       if (body.object === 'page') {
         // Iterate over each entry - there may be multiple if batched
@@ -119,11 +105,11 @@ const facebookMessenager = {
           // Get the webhook event. entry.messaging is an array, but 
           // will only ever contain one event, so we get index 0
           let webhook_event = entry.messaging[0];
-          console.log(webhook_event);
+          //console.log(webhook_event);
 
           // Get the sender PSID
           let sender_psid = webhook_event.sender.id;
-          console.log('Sender PSID: ' + sender_psid);
+          //console.log('Sender PSID: ' + sender_psid);
 
           // Check if the event is a message or postback and
           // pass the event to the appropriate handler function

@@ -10,8 +10,10 @@
     "deploy": "pm2 deploy ecosystem.config.js production"
   },
   "dependencies": {
+    "mysql2": "^1.5.1",
     "node-wit": "^4.3.0",
     "request": "^2.83.0",
-    "restify": "^6.3.2"
+    "restify": "^6.3.2",
+    "sequelize": "^4.23.1"
   }
 }

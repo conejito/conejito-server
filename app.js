@@ -26,13 +26,14 @@ server.get('/webhook', facebook.verify);
 server.post('/webhook', facebook.handleRequest);
 
 // handle incoming messages
-server.post('/message', (req, res, next) => {
+server.post('/message', async (req, res, next) => {
   req.accepts('application/json');
   const message = req.body.q.toLowerCase();
-  bot.ask(message)
-    .then( (response) => {
-      res.send( bot.answer(response) );
-    });
+  const response = await bot.ask(message)
+  const r = await bot.answer(response)
+  const answer = r ? r : await bot.unclear()
+  console.log(answer[0].Answer);
+  res.send( answer[0].Answer );
 });
 
 // serve static content

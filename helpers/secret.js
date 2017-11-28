@@ -5,5 +5,9 @@ module.exports = {
   "facebook": {
     "verify-token": process.env.facebookVerifyToken,
     "page-token": process.env.facebookPageToken
+  },
+  "mysql": {
+    "username": process.env.mysqlUsername,
+    "password": process.env.mysqlPassword
   }
 }
