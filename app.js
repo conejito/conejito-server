@@ -6,20 +6,29 @@ const bot = require('./helpers/bot');
 const secret = require('./helpers/secret');
 const facebook = require('./helpers/facebook');
 
+const Person = require('./modules/Person');
+
 server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
 
 server.use(restify.plugins.requestLogger());
 
-// allow cross-origin resource sharing
-server.use( (req,res,next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "X-Requested-With");
-  return next();
-});
+const corsMiddleware = require('restify-cors-middleware')
 
-server.on('uncaughtException', () => {
+const cors = corsMiddleware({
+  //preflightMaxAge: 5, //Optional
+  origins: ['*'],
+  allowHeaders: ['*']
+  //allowHeaders: ['API-Token'],
+  //exposeHeaders: ['API-Token-Expiry']
+})
+
+server.pre(cors.preflight)
+server.use(cors.actual)
+
+server.on('uncaughtException', (err) => {
   console.log('============ uncaughtException ============');
+  console.log(err);
 });
 
 server.get('/webhook', facebook.verify);
@@ -28,12 +37,22 @@ server.post('/webhook', facebook.handleRequest);
 // handle incoming messages
 server.post('/message', async (req, res, next) => {
   req.accepts('application/json');
-  const message = req.body.q.toLowerCase();
+  const body = req.body.q ? req.body : JSON.parse(req.body)
+
+  const message = body.q.toLowerCase()
   const response = await bot.ask(message)
   const r = await bot.answer(response)
   const answer = r ? r : await bot.unclear()
   console.log(answer[0].Answer);
-  res.send( answer[0].Answer );
+
+  const person = new Person(body.sid)
+  console.log(person)
+
+  res.send({ 
+    sid: person.id,
+    text: answer[0].Answer,
+    timestamp: new Date().getTime()
+  });
 });
 
 // serve static content

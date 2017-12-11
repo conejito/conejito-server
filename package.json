@@ -14,6 +14,9 @@
     "node-wit": "^4.3.0",
     "request": "^2.83.0",
     "restify": "^6.3.2",
-    "sequelize": "^4.23.1"
+    "restify-cors-middleware": "^1.0.1",
+    "rethinkdb": "^2.3.3",
+    "sequelize": "^4.23.1",
+    "uuid": "^3.1.0"
   }
 }
