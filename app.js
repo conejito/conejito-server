@@ -1,17 +1,20 @@
-const restify = require('restify');
-const server = restify.createServer();
+const restify = require('restify')
+const server = restify.createServer()
+const Message = require('./classes/Message')
+const Intent = require('./classes/Intent')
+const Answer = require('./classes/Answer')
 
 // include helpers
-const bot = require('./helpers/bot');
-const secret = require('./helpers/secret');
-const facebook = require('./helpers/facebook');
+const bot = require('./helpers/bot')
+const secret = require('./helpers/secret')
+const facebook = require('./helpers/facebook')
 
-const Person = require('./modules/Person');
+const Person = require('./modules/Person')
 
-server.use(restify.plugins.bodyParser());
-server.use(restify.plugins.queryParser());
+server.use(restify.plugins.bodyParser())
+server.use(restify.plugins.queryParser())
 
-server.use(restify.plugins.requestLogger());
+server.use(restify.plugins.requestLogger())
 
 const corsMiddleware = require('restify-cors-middleware')
 
@@ -37,9 +40,10 @@ server.post('/webhook', facebook.handleRequest);
 // handle incoming messages
 server.post('/message', async (req, res, next) => {
   req.accepts('application/json');
-  const body = req.body.q ? req.body : JSON.parse(req.body)
+  const message = new Message(req.body)
+  const intent = new Intent(message.getText())
+  const answer = new Answer({intent})
 
-  const message = body.q.toLowerCase()
   const response = await bot.ask(message)
   const r = await bot.answer(response)
   const answer = r ? r : await bot.unclear()
@@ -48,7 +52,7 @@ server.post('/message', async (req, res, next) => {
   const person = new Person(body.sid)
   console.log(person)
 
-  res.send({ 
+  res.send({
     sid: person.id,
     text: answer[0].Answer,
     timestamp: new Date().getTime()
