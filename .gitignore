@@ -5,3 +5,5 @@ env.sh
 
 .vscode
 rethinkdb_data
+dist
+data
